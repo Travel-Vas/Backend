@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <!--    <link rel="stylesheet" href="/css/otp.style.css">-->
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+
+      .email-container {
+        max-width: 600px;
+        margin: 30px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .email-header {
+        background-color: #4caf50;
+        color: white;
+        text-align: center;
+        padding: 20px 0;
+      }
+
+      .email-body {
+        padding: 20px 30px;
+      }
+
+      h1 {
+        color: #333;
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+
+      p {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      .transaction-details {
+        margin-top: 20px;
+        border-top: 1px solid #ddd;
+        padding-top: 15px;
+      }
+
+      .transaction-details span {
+        display: block;
+        color: #777;
+        margin-bottom: 5px;
+      }
+
+      .transaction-details strong {
+        display: block;
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .email-footer {
+        background-color: #f9f9f9;
+        color: #777;
+        text-align: center;
+        padding: 15px 0;
+        font-size: 12px;
+        border-top: 1px solid #ddd;
+      }
+
+      .email-footer a {
+        color: #4caf50;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="email-header">
+        <h2>Gookway.</h2>
+      </div>
+      <div class="email-body">
+        <h1>Deposit Confirmation</h1>
+        <p>Hi <%= client_name %>,</p>
+        <p>
+          We’re happy to inform you that your recent deposit of
+          <strong>&#x20A6;<%= amount %></strong> has been successfully processed
+          and added to your account.
+        </p>
+
+        <div class="transaction-details">
+          <span>Transaction Details:</span>
+          <strong>Amount Deposited: &#x20A6;<%= amount %></strong>
+          <strong>Date: <%= tx_date %></strong>
+          <strong>Reference Number: <%= ref %></strong>
+        </div>
+
+        <p>
+          Thank you for choosing our services! If you have any questions or
+          concerns, please feel free to reach out to our support team.
+        </p>
+      </div>
+
+      <div class="email-footer">
+        <p>&copy; 2024 Gookway. All rights reserved.</p>
+        <p><a href="mailto:support@yourcompany.com">Contact Support</a></p>
+      </div>
+    </div>
+  </body>
+</html>

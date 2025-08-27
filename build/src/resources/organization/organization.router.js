@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const organization_controller_1 = require("./organization.controller");
+const middlewares_1 = require("../../middlewares");
+const router = express_1.default.Router();
+router.post("/register", organization_controller_1.organizationController);
+router.post("/verify-account", organization_controller_1.verifyOrgAccountController);
+router.post("/resend-otp", organization_controller_1._resendOrgOtpController);
+router.post("/forgot-password", organization_controller_1._forgotOrgPasswordController);
+router.post("/reset-password", organization_controller_1._resetOrgPasswordController);
+router.post("/login", organization_controller_1._loginOrgController);
+router.get("/logout", middlewares_1.authenticateOrg, organization_controller_1.logoutOrgController);
+router.get("/all", middlewares_1.authenticateOrg, organization_controller_1._fetchAllOrgsController);
+router.get("/analytics", organization_controller_1.analyticsController);
+router.route('/').get(middlewares_1.authenticateOrg, organization_controller_1._getOrgProfileController);
+router.route('/:id').patch(middlewares_1.authenticateOrg, organization_controller_1.orgProfileUpdateController);
+router.route("/").delete(middlewares_1.authenticateOrg, organization_controller_1.deleteOrgProfilecontroller);
+exports.default = { router: router, path: "/organization" };

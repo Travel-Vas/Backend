@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+
+      .email-container {
+        max-width: 600px;
+        margin: 30px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .email-header {
+        background-color: #4caf50;
+        color: white;
+        text-align: center;
+        padding: 20px 0;
+      }
+
+      .email-body {
+        padding: 20px 30px;
+      }
+
+      h1, h2 {
+        color: #4caf50;
+        margin-bottom: 20px;
+      }
+
+      p {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      .cta-button {
+        display: inline-block;
+        padding: 12px 25px;
+        margin-top: 20px;
+        background-color: #4caf50;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+      .cta-button:hover {
+        background-color: #45a049;
+      }
+
+      .email-footer {
+        background-color: #4caf50;
+        color: white;
+        text-align: center;
+        padding: 15px 0;
+        font-size: 12px;
+      }
+
+      .email-footer a {
+        color: white;
+        text-decoration: none;
+      }
+
+      .order_id {
+        font-weight: 900;
+      }
+
+      .table-container {
+        overflow-x: auto;
+        margin-bottom: 20px;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div class="email-container">
+      <div class="email-header">
+        <h2>Your Gookway Receipt</h2>
+      </div>
+      <div class="email-body">
+        <h1>Thank you, <%= client_name %>!</h1>
+        <p>
+        Here is a summary of your recent purchase from Gookway.
+        </p>
+
+        <h2>Order Summary</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th style="text-align: right;">Price</th>
+                <th style="text-align: right;">Quantity</th>
+                <th style="text-align: right;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for (let item of items) { %>
+              <tr>
+                <td><%= item.name %></td>
+                <td style="text-align: right;">&#x20A6;<%= item.price.toFixed(2) %></td>
+                <td style="text-align: right;"><%= item.qty %></td>
+                <td style="text-align: right;">&#x20A6;<%= item.total.toFixed(2) %></td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Order Total: &#x20A6;<%= order_total.toFixed(2) %></h2>
+
+        <p>
+          If you have any questions or concerns, please don't hesitate to
+          contact our customer support team.
+        </p>
+      </div>
+
+      <div class="email-footer">
+        <p>&copy; 2024 Gookway. All rights reserved.</p>
+        <p><a href="mailto:support@yourcompany.com">Contact Support</a></p>
+      </div>
+    </div>
+  </body>
+</html>

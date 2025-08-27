@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to Fotolocker</title>
+    <style>
+      /* Reset/Base Styles for Email Clients */
+      body, html {
+        margin: 0;
+        padding: 0;
+        -webkit-text-size-adjust: 100%; /* Prevent font scaling on iOS */
+        -ms-text-size-adjust: 100%; /* Prevent font scaling on Windows Mobile */
+        width: 100%;
+        font-family: 'Segoe UI', Arial, sans-serif; /* Apply font here as well for broad support */
+        background-color: #f8f9fa; /* Apply background to body */
+      }
+      table {
+        mso-table-lspace: 0pt !important; /* Outlook specific */
+        mso-table-rspace: 0pt !important; /* Outlook specific */
+        border-collapse: collapse !important;
+        border-spacing: 0 !important;
+      }
+      td {
+        border-collapse: collapse !important;
+      }
+      img {
+        border: 0;
+        outline: none;
+        text-decoration: none;
+        -ms-interpolation-mode: bicubic; /* IE specific */
+      }
+      a {
+        text-decoration: none;
+        color: inherit; /* Inherit color to allow parent styles to apply */
+      }
+      p {
+        margin: 0; /* Reset default paragraph margins */
+        padding: 0;
+      }
+
+      /* --- Main Email Container --- */
+      .email-container {
+        max-width: 600px;
+        margin: 30px auto; /* Centers the container in the page */
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden; /* Ensures border-radius is respected */
+      }
+
+      /* --- Header Section --- */
+      .email-header {
+        background: linear-gradient(135deg, #0033F1 0%, #002bc8 100%);
+        color: white;
+        text-align: center; /* Centers header text and inline content */
+        padding: 30px 0;
+      }
+      .logo-container {
+        margin-bottom: 15px;
+        display: flex;
+                justify-content:center;
+                align-items:center;
+      }
+      .logo-container img {
+        width: 120px;
+        height: auto;
+        display: block; /* Important for centering with margin: auto */
+        margin: 0 auto 10px; /* Centers the image */
+      }
+      .brand-name {
+        font-size: 28px;
+        font-weight: 600;
+        margin: 0;
+      }
+      .brand-name .foto { color: #FFFFFF; }
+      .brand-name .locker { color: white; }
+
+      /* --- Email Body Content --- */
+      .email-body {
+        padding: 40px 30px; /* Controls inner spacing */
+        text-align: left; /* Aligns all text/inline content to the left within this block */
+        color: #444; /* Default text color for body paragraphs */
+      }
+      .email-body h1 {
+        color: #0033F1;
+        font-size: 24px;
+        margin-bottom: 20px;
+        /* No specific text-align needed here, inherits from .email-body */
+      }
+      .email-body p {
+        line-height: 1.8;
+        margin-bottom: 15px;
+        /* No specific text-align needed here, inherits from .email-body */
+      }
+      .feature-list {
+        margin: 25px 0;
+        padding-left: 20px;
+        /* No specific text-align needed here, inherits from .email-body */
+      }
+      .feature-list li {
+        color: #444;
+        margin-bottom: 10px;
+        line-height: 1.6;
+      }
+
+      /* --- CTA Button --- */
+      .cta-button-container {
+        text-align: center; /* Centers the inline-block button */
+        margin: 30px 0;
+      }
+      .cta-button {
+        display: inline-block; /* Essential for padding, margins, and text-align: center on parent */
+        padding: 14px 30px;
+        background-color: transparent;
+        color: #0033F1;
+        border: 2px solid #0033F1;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+      .cta-button:hover {
+        background-color: #002bc8;
+        color: #FFFFFF;
+        border-color: #002bc8;
+      }
+
+      /* --- Footer --- */
+      .email-footer {
+        background-color: #f9f9fa;
+        color: #666;
+        text-align: center; /* Centers ALL text and inline-block children */
+        padding: 20px 0;
+        font-size: 12px;
+        border-top: 1px solid #eee;
+      }
+      .email-footer p {
+          margin: 5px 0; /* Add margin for footer paragraphs */
+      }
+      .email-footer a {
+        color: #0033F1;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .email-footer a:hover { text-decoration: underline; }
+
+      /* --- Social Links (Fixed for robust centering) --- */
+      .social-container {
+        /* This container is inside the .email-footer which has text-align: center,
+           so it will also be centered if it were inline-block.
+           Using margin: auto for block-level elements to center them more reliably. */
+        width: 100%; /* Important for flex to span width within a table cell */
+        /* display: flex; /* Not strictly necessary if ul.social-links is centered by margin:auto */
+        /* justify-content: center; */ /* Not strictly necessary here */
+        margin: 20px auto; /* Centers the social-container itself within its parent's flow */
+      }
+      .social-links {
+        display: flex; /* Activates flexbox for list items */
+        justify-content: center; /* Centers list items horizontally */
+        align-items: center;
+        gap: 20px; /* Space between links */
+        padding: 0;
+        margin: 0 auto; /* Added margin: auto to center the UL itself, good fallback */
+        list-style: none; /* Remove default list bullets */
+      }
+      .social-links li {
+        display: inline-block; /* Good for email client compatibility */
+      }
+      .social-links a {
+        color: #0033F1;
+        text-decoration: none;
+        display: flex; /* For icon and text alignment */
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        transition: color 0.2s ease;
+      }
+      .social-links a:hover { color: #002bb8; }
+      .social-icon { width: 24px; height: 24px; }
+
+      /* --- Responsive Adjustments --- */
+      @media screen and (max-width: 480px) {
+        .email-container {
+          margin: 15px auto;
+          border-radius: 0; /* Optional: make corners sharp on mobile */
+        }
+        .email-body {
+          padding: 30px 20px; /* Reduce padding on small screens */
+        }
+        .cta-button {
+          padding: 12px 25px;
+          font-size: 15px;
+        }
+        .social-links {
+          flex-direction: column; /* Stack social links vertically on small screens */
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #f8f9fa;">
+      <tr>
+        <td align="center" valign="top">
+          <div class="email-container">
+            <div class="email-header">
+              <div class="logo-container">
+                <img src="https://storage.googleapis.com/fotolocker-bucket-prod/DP2.jpg" alt="Fotolocker Logo">
+              </div>
+              <h2 class="brand-name">
+                <span class="foto">Foto</span><span class="foto">locker</span>
+              </h2>
+              <p style="margin: 5px 0 0; font-size: 14px; color: white;">Secure. Share. Earn.</p>
+            </div>
+
+            <div class="email-body">
+              <h1>Welcome to Fotolocker, <%= client_name %>!</h1>
+              <p>
+                We're thrilled to welcome you to <strong>Fotolocker</strong>, your new digital home for professional photography management and growth!
+              </p>
+              <p>
+                At FotoLocker, our mission is to empower photographers by providing a
+                secure, seamless, and profitable way to share their work with clients. We
+                strive to bridge the gap between creativity and business by offering a
+                platform that ensures image protection, effortless distribution, and fair
+                monetization.
+              </p>
+
+              <ul class="feature-list">
+                <li>Secure Photo Sharing: Safeguard your creativity with state-of-the-art encryption and protection, ensuring your photos are shared confidently without compromising ownership.</li>
+                <li>Digital Rights Management (DRM): Take control of your work with comprehensive tools to manage usage rights, preventing unauthorized distribution and ensuring fair compensation for every image.</li>
+                <li>Global Reach for Photographers: Connect with a global community of photographers and visual storytellers, expanding your exposure and access to new opportunities.</li>
+                <li>Monetization Opportunities: Turn your passion into profit with integrated features that allow you to easily sell, license, or showcase your work to a worldwide audience.</li>
+                <li>Creative Ownership and Recognition: Empowering photographers to maintain full ownership of their content while receiving proper credit and rewards, ensuring that every piece of work is valued and protected.</li>
+              </ul>
+
+              <div class="cta-button-container">
+                <a href="https://www.fotolocker.io" class="cta-button">Explore Your Dashboard</a>
+              </div>
+
+              <p>
+                We're committed to helping you succeed in your photography journey. If you have any questions or need assistance, our support team is always here to help.
+              </p>
+            </div>
+
+            <div class="email-footer">
+              <div class="social-container">
+                <ul class="social-links">
+                  <li>
+                    <a href="https://www.instagram.com/fotolockerhq" target="_blank" rel="noopener noreferrer">
+                      <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                      Instagram
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://x.com/fotolockerhq" target="_blank" rel="noopener noreferrer">
+                      <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                      Twitter
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://web.facebook.com/profile.php?id=61573401063799" target="_blank" rel="noopener noreferrer">
+                      <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/>
+                      </svg>
+                      Facebook
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.linkedin.com/company/fotolocker/" target="_blank" rel="noopener noreferrer">
+                      <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                      </svg>
+                      LinkedIn
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <p>&copy; 2025 Fotolocker. All rights reserved.</p>
+              <p><a href="mailto:info@fotolocker.io">Contact Support</a></p>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

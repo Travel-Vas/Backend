@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fotolocker Client Download Notification</title>
+    <style>
+      /* Reset/Base Styles for Email Clients */
+      body, html {
+        margin: 0;
+        padding: 0;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        width: 100%;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: #f8f9fa;
+        line-height: 1.6;
+        /* text-align: center; REMOVED from body */
+      }
+      table {
+        mso-table-lspace: 0pt !important;
+        mso-table-rspace: 0pt !important;
+        border-collapse: collapse !important;
+        border-spacing: 0 !important;
+      }
+      td {
+        border-collapse: collapse !important;
+      }
+      img {
+        border: 0;
+        outline: none;
+        text-decoration: none;
+        -ms-interpolation-mode: bicubic;
+        display: block; /* Ensures no extra space below images */
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      p {
+        margin: 0;
+        padding: 0;
+      }
+      ul, ol { /* Reset default list margins and padding */
+        margin: 0;
+        padding: 0;
+        list-style: none; /* Remove default bullets for ul */
+      }
+      li {
+        margin: 0;
+        padding: 0;
+      }
+
+
+      /* --- Main Email Container --- */
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto; /* Centers the container */
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        /* text-align: center; REMOVED from email-container */
+      }
+
+      /* --- Header Section --- */
+      .email-header {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        padding: 40px 20px;
+        text-align: center; /* Header content (logo, brand name) remains centered */
+        border-bottom: 1px solid #eaeaea;
+      }
+      .logo-container {
+        margin-bottom: 15px;
+        text-align: center;
+        display: flex;
+        justify-content:center;
+        align-items:center;
+      }
+      .logo-container img {
+        width: 120px;
+        height: auto;
+        margin: 0 auto 10px; /* Centers the image */
+        display: block;
+      }
+      .brand-name {
+        font-size: 28px;
+        font-weight: 600;
+        margin: 0;
+        text-align: center;
+      }
+      .brand-name .foto, .brand-name .locker {
+        color: #0033F1;
+      }
+      .tagline {
+        color: #666;
+        font-size: 14px;
+        margin: 5px 0 0;
+        font-style: italic;
+        text-align: center;
+      }
+
+      /* --- Email Body Content --- */
+      .email-body {
+        padding: 40px;
+        color: #333;
+        text-align: left; /* FORCE LEFT ALIGN for body text by default */
+      }
+      .email-body p {
+        margin: 0 0 15px; /* Adjust margin for paragraphs */
+        text-align: left; /* Ensure paragraphs are left-aligned */
+      }
+      h1 {
+        color: #0033F1;
+        font-size: 24px;
+        margin: 0 0 20px;
+        text-align: center; /* Heading remains centered */
+      }
+
+      .download-info {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border: 2px solid #0033F1;
+        padding: 20px;
+        font-size: 18px;
+        color: #333;
+        border-radius: 8px;
+        margin: 25px auto; /* Centers the block */
+        text-align: center; /* Centers its inner content */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        max-width: fit-content; /* Allows margin:auto to work */
+      }
+      .download-info p { margin: 0 0 10px; }
+      .highlight {
+        font-size: 24px;
+        font-weight: bold;
+        color: #0033F1;
+        display: block;
+        margin: 10px 0;
+      }
+
+      .client-details {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0; /* No auto margin here, aligns left with parent */
+        text-align: left; /* Ensure its content is left-aligned */
+      }
+      .client-details p { margin: 5px 0; }
+      .client-details strong { color: #0033F1; }
+
+      .action-button-container {
+        text-align: center; /* Centers the inline-block button */
+        margin: 30px 0;
+      }
+      .action-button {
+        display: inline-block;
+        background-color: #0033F1; /* Changed from white to match action button style */
+        color: white; /* Changed color for white background */
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        /* border: 2px solid #0033F1; Removed border, not in final design */
+        transition: background-color 0.2s ease;
+      }
+      .action-button:hover { background-color: #002bb8; }
+
+      .stats-section {
+        background-color: #f8f9fa;
+        padding: 20px 25px;
+        border-radius: 8px;
+        margin: 25px 0; /* No auto margin here, aligns left with parent */
+        text-align: left; /* Ensure its content is left-aligned */
+      }
+      .stats-section h3 {
+        color: #0033F1;
+        margin-top: 0;
+        text-align: left; /* Heading inside stats section is left-aligned */
+      }
+      .stats-section ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .stats-section li { margin-bottom: 8px; }
+      .stats-section li:last-child { margin-bottom: 0; }
+
+      .email-footer {
+        background-color: #f8f9fa;
+        color: #666;
+        text-align: center; /* FORCE ALL TEXT AND INLINE/INLINE-BLOCK CHILDREN TO CENTER */
+        padding: 25px 20px;
+        font-size: 13px;
+        border-top: 1px solid #eaeaea;
+      }
+      .email-footer p { margin: 5px 0; }
+      .email-footer a {
+        color: #0033F1;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .email-footer a:hover { text-decoration: underline; }
+
+      /* --- Social Links (FORCED CENTERING) --- */
+      .social-links { /* This is the UL */
+        display: flex;
+        justify-content: center; /* Centers flex items */
+        align-items: center;
+        flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+        gap: 20px; /* Space between links */
+        padding: 0;
+        margin: 20px auto; /* FORCES CENTERING OF THE UL BLOCK */
+        list-style: none; /* Remove default bullets */
+        max-width: fit-content; /* Allows margin:auto to work by shrinking UL to content width */
+      }
+      .social-links li {
+        display: inline-block; /* Good for email client compatibility */
+        vertical-align: middle; /* Helps with vertical alignment in older clients */
+      }
+      .social-links a {
+        color: #0033F1;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        font-size: 14px;
+        transition: color 0.2s ease;
+        padding: 5px;
+      }
+      .social-links a:hover { color: #002bb8; }
+      .social-icon { width: 24px; height: 24px; }
+
+      .closing { margin-top: 25px; margin-bottom: 10px; text-align: left; } /* Added text-align:left */
+
+      /* Responsive styles */
+      @media screen and (max-width: 600px) {
+        .email-body { padding: 25px 20px; }
+        h1 { font-size: 22px; margin-bottom: 20px; }
+        .download-info { padding: 15px; font-size: 16px; margin: 20px auto; max-width: 100%; } /* Ensure it adapts to mobile width */
+        .action-button { display: block; width: 80%; margin: 0 auto; padding: 12px 20px; }
+        .social-links { gap: 15px; }
+        .logo-container { height: 60px; line-height: 60px; }
+        .logo-container img { max-width: 100px; height: 60px; }
+      }
+      @media screen and (max-width: 400px) {
+        .email-body { padding: 20px 15px; }
+        .social-links { flex-direction: column; align-items: center; gap: 10px; }
+        .social-links a { padding: 8px; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #f8f9fa;">
+      <tr>
+        <td align="center" valign="top">
+          <div class="email-container">
+            <div class="email-header">
+              <div class="logo-container">
+                <img src="https://storage.googleapis.com/fotolocker-bucket-prod/DP2.jpg"
+                     alt="Fotolocker Logo"
+                     onerror="this.onerror=null; this.style.display='none';">
+              </div>
+              <h2 class="brand-name">
+                <span class="foto">foto</span><span class="locker">locker</span>
+              </h2>
+              <p class="tagline">Secure. Share. Earn.</p>
+            </div>
+
+            <div class="email-body">
+              <h1>Client Download Notification</h1>
+
+              <p>Hello <%= photographer_name %>,</p>
+
+              <p>We wanted to let you know that your client has downloaded the photos from your recent shoot!</p>
+
+              <div class="download-info">
+                <p>Your client has downloaded:</p>
+                <span class="highlight">the edited photos</span>
+                <p>from your <%= shoot_type %> shoot</p>
+              </div>
+
+              <div class="client-details">
+                <p><strong>Client:</strong> <%= client_name %></p>
+                <p><strong>Download Date:</strong> <%= download_date %></p>
+                <p><strong>Shoot Name:</strong> <%= shoot_name %></p>
+              </div>
+
+              <p>This is a great time to follow up with your client to ensure they're satisfied with their photos and to discuss any potential additional services or future bookings.</p>
+
+              <div class="action-button-container">
+                <a href="<%= dashboard_url %>" class="action-button">View Dashboard</a>
+              </div>
+              <p class="closing">Thank you for using fotolocker to share your beautiful work with your clients. We're here to help you succeed!</p>
+            </div>
+
+            <div class="email-footer">
+              <ul class="social-links">
+                <li>
+                  <a href="https://www.instagram.com/fotolockerhq" target="_blank" rel="noopener noreferrer">
+                    <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                    Instagram
+                  </a>
+                </li>
+                <li>
+                  <a href="https://x.com/fotolockerhq" target="_blank" rel="noopener noreferrer">
+                    <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    Twitter
+                  </a>
+                </li>
+                <li>
+                  <a href="https://web.facebook.com/profile.php?id=61573401063796" target="_blank" rel="noopener noreferrer">
+                    <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/>
+                    </svg>
+                    Facebook
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.linkedin.com/company/fotolocker/" target="_blank" rel="noopener noreferrer">
+                    <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                    LinkedIn
+                  </a>
+                </li>
+              </ul>
+              <p>&copy; 2025 fotolocker. All rights reserved.</p>
+              <p>Need help? <a href="mailto:info@fotolocker.io">Contact Support</a></p>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

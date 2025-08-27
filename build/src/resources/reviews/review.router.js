@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const review_controller_1 = require("./review.controller");
+const middlewares_1 = require("../../middlewares");
+const review_validation_1 = require("./review.validation");
+const constants_1 = require("../../helpers/constants");
+const router = (0, express_1.Router)();
+router.route('/').post(middlewares_1.authenticate, (0, middlewares_1.restrictTo)(constants_1.UserRole.CUSTOMER), (0, middlewares_1.validationMiddleware)(review_validation_1.createReviewSchema), review_controller_1.createReviewController);
+router.route('/:product_id').get(review_controller_1.getReviewController);
+exports.default = { router, path: '/reviews' };

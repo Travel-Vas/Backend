@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const transaction_controller_1 = require("./transaction.controller");
+const middlewares_1 = require("../../middlewares");
+const transaction_validation_1 = require("./transaction.validation");
+const router = (0, express_1.Router)();
+router.post('/webhook', transaction_controller_1.WebHookController);
+router.post('/generate-link', middlewares_1.authenticate, (0, middlewares_1.validationMiddleware)(transaction_validation_1.generatePaymentLinkSchema), transaction_controller_1.generatePaymentLinkController);
+router.get('/verify-tx/:ref', middlewares_1.authenticate, transaction_controller_1.verifyTxController);
+router.get('/banks', middlewares_1.authenticate, transaction_controller_1.getListOfBanksController);
+router.get('/resolve-account', middlewares_1.authenticate, transaction_controller_1.resolveAccountController);
+router.post('/withdraw', middlewares_1.authenticate, (0, middlewares_1.validationMiddleware)(transaction_validation_1.withdrawTxSchema), transaction_controller_1.createWithdrawalTxController);
+router.get('/approve-withdraw/:tx_id', middlewares_1.authenticate, /**restrict to admin**/ transaction_controller_1.approveWithdrawalTxController);
+router.route('').get(middlewares_1.authenticate, transaction_controller_1.getTxHistoryController);
+exports.default = { path: '/transactions', router };
