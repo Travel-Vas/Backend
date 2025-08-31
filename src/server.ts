@@ -43,12 +43,8 @@ export default class App {
         const corsOptions = {
             origin: [
                 'http://localhost:3000',
-                'https://fotolocker-prod.vercel.app',
-                'https://staging.fotolocker.io/',
-                'fotolocker-staging.vercel.app',
-                'https://www.fotolocker.io',
-                'https://fotolocker.io',
-                'https://staging.fotolocker.io',
+               'https://landing-page-phi-sooty.vercel.app/',
+                'https://www.mytravelvas.com/',
                 'https://dashboard.stripe.com',
                 '*'],
             credentials: true // allow credentials
