@@ -44,8 +44,9 @@ export default class App {
             origin: [
                 'http://localhost:3000',
                'https://landing-page-phi-sooty.vercel.app/',
-                'https://www.mytravelvas.com/',
+                'https://www.mytravelvas.com',
                 'https://dashboard.stripe.com',
+                'https://www.mytravelvas.com',
                 '*'],
             credentials: true // allow credentials
         }
