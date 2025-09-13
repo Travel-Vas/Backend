@@ -3,6 +3,7 @@ import { ITrip } from './booking.interface';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { CustomError } from '../../helpers/lib/App';
 import { StatusCodes } from 'http-status-codes';
+import {UserRole} from "../../helpers/constants";
 
 export const createTripService = async (tripData: Partial<ITrip>, files?: Express.Multer.File[]): Promise<ITripDocument> => {
     try {
@@ -34,13 +35,36 @@ export const getAllTripsService = async (page: number = 1, limit: number = 10, u
     try {
         const skip = (page - 1) * limit;
         const trips = await Trip.find({
-            userId:userId
+            creator: UserRole.ADMIN
         })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .lean();
         
+        const total = await Trip.countDocuments();
+        const pages = Math.ceil(total / limit);
+
+        return { trips, total, pages };
+    } catch (error: any) {
+        throw new CustomError({
+            message: error.message || 'Failed to fetch trips',
+            code: StatusCodes.INTERNAL_SERVER_ERROR
+        });
+    }
+};
+export const getAllTripsHistoryService = async (page: number = 1, limit: number = 10, userId:any): Promise<{ trips: ITripDocument[], total: number, pages: number }> => {
+    try {
+        const skip = (page - 1) * limit;
+        const trips = await Trip.find({
+            userId: userId,
+            creator: { $in: ["", null] },
+        })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
         const total = await Trip.countDocuments();
         const pages = Math.ceil(total / limit);
 

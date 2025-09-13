@@ -68,6 +68,11 @@ const TripSchema: Schema = new Schema({
     documents: [{
         type: String
     }],
+    activities: [
+        {
+            type:String
+        }
+    ],
     status: {
         type: String,
         enum: Object.values(tripStatus),
@@ -76,6 +81,9 @@ const TripSchema: Schema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
+    },
+    creator: {
+        type: String
     }
 }, {
     timestamps: true

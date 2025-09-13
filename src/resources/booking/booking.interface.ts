@@ -18,6 +18,7 @@ export interface ITrip {
     tripCost: string
     status:tripStatus
     userId:any
+    activities: string[]
 }
 
 export enum  tripStatus {

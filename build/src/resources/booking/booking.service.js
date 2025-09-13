@@ -9,11 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTripsByStatusService = exports.deleteTripService = exports.updateTripService = exports.getTripByIdService = exports.getAllTripsService = exports.createTripService = void 0;
+exports.getTripsByStatusService = exports.deleteTripService = exports.updateTripService = exports.getTripByIdService = exports.getAllTripsHistoryService = exports.getAllTripsService = exports.createTripService = void 0;
 const booking_model_1 = require("./booking.model");
 const cloudinary_1 = require("../../utils/cloudinary");
 const App_1 = require("../../helpers/lib/App");
 const http_status_codes_1 = require("http-status-codes");
+const constants_1 = require("../../helpers/constants");
 const createTripService = (tripData, files) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let documentUrls = [];
@@ -39,7 +40,7 @@ const getAllTripsService = (...args_1) => __awaiter(void 0, [...args_1], void 0,
     try {
         const skip = (page - 1) * limit;
         const trips = yield booking_model_1.Trip.find({
-            userId: userId
+            creator: constants_1.UserRole.ADMIN
         })
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -57,6 +58,29 @@ const getAllTripsService = (...args_1) => __awaiter(void 0, [...args_1], void 0,
     }
 });
 exports.getAllTripsService = getAllTripsService;
+const getAllTripsHistoryService = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (page = 1, limit = 10, userId) {
+    try {
+        const skip = (page - 1) * limit;
+        const trips = yield booking_model_1.Trip.find({
+            userId: userId,
+            creator: { $in: ["", null] },
+        })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+        const total = yield booking_model_1.Trip.countDocuments();
+        const pages = Math.ceil(total / limit);
+        return { trips, total, pages };
+    }
+    catch (error) {
+        throw new App_1.CustomError({
+            message: error.message || 'Failed to fetch trips',
+            code: http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR
+        });
+    }
+});
+exports.getAllTripsHistoryService = getAllTripsHistoryService;
 const getTripByIdService = (tripId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const trip = yield booking_model_1.Trip.findById(tripId);

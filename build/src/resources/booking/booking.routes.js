@@ -19,6 +19,7 @@ router.post('/', middlewares_1.authenticate, documentUpload_1.documentUpload.sin
  * @query limit - Items per page (default: 10)
  */
 router.get('/', middlewares_1.authenticate, booking_controller_1.getAllTripsController);
+router.get('/history', middlewares_1.authenticate, booking_controller_1.getAllTripsHistoryController);
 /**
  * @route GET /api/trips/:id
  * @desc Get trip by ID

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTripsByStatusController = exports.deleteTripController = exports.updateTripController = exports.getTripByIdController = exports.getAllTripsController = exports.createTripController = void 0;
+exports.getTripsByStatusController = exports.deleteTripController = exports.updateTripController = exports.getTripByIdController = exports.getAllTripsHistoryController = exports.getAllTripsController = exports.createTripController = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const booking_service_1 = require("./booking.service");
 const createTripController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -35,6 +35,18 @@ const getAllTripsController = (req, res) => __awaiter(void 0, void 0, void 0, fu
     });
 });
 exports.getAllTripsController = getAllTripsController;
+const getAllTripsHistoryController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const userId = req['user']._id;
+    const result = yield (0, booking_service_1.getAllTripsHistoryService)(page, limit, userId);
+    res.status(http_status_codes_1.StatusCodes.OK).json({
+        msg: "Trips fetched successfully",
+        data: result,
+        statusCode: http_status_codes_1.StatusCodes.OK
+    });
+});
+exports.getAllTripsHistoryController = getAllTripsHistoryController;
 const getTripByIdController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const trip = yield (0, booking_service_1.getTripByIdService)(id);

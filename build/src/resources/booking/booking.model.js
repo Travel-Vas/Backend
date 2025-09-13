@@ -91,6 +91,11 @@ const TripSchema = new mongoose_1.Schema({
     documents: [{
             type: String
         }],
+    activities: [
+        {
+            type: String
+        }
+    ],
     status: {
         type: String,
         enum: Object.values(booking_interface_1.tripStatus),
@@ -99,6 +104,9 @@ const TripSchema = new mongoose_1.Schema({
     userId: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
+    },
+    creator: {
+        type: String
     }
 }, {
     timestamps: true

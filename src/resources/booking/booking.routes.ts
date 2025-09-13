@@ -5,7 +5,7 @@ import {
     getTripByIdController,
     updateTripController,
     deleteTripController,
-    getTripsByStatusController
+    getTripsByStatusController, getAllTripsHistoryController
 } from './booking.controller';
 import { documentUpload } from '../../middlewares/documentUpload';
 import {authenticate} from "../../middlewares";
@@ -28,6 +28,7 @@ router.post('/',authenticate, documentUpload.single('document'), createTripContr
  */
 router.get('/',authenticate, getAllTripsController);
 
+router.get('/history',authenticate, getAllTripsHistoryController);
 /**
  * @route GET /api/trips/:id
  * @desc Get trip by ID

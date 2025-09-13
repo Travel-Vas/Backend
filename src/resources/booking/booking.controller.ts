@@ -2,11 +2,10 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import {
     createTripService,
-    getAllTripsService,
     getTripByIdService,
     updateTripService,
     deleteTripService,
-    getTripsByStatusService
+    getTripsByStatusService, getAllTripsHistoryService, getAllTripsService
 } from './booking.service';
 import { CustomResponse } from '../../helpers/lib/App';
 
@@ -38,6 +37,20 @@ export const getAllTripsController = async (req: Request, res: CustomResponse<an
             data: result,
             statusCode: StatusCodes.OK
         });
+};
+
+export const getAllTripsHistoryController = async (req: Request, res: CustomResponse<any>) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const userId = req['user']._id
+
+    const result = await getAllTripsHistoryService(page, limit, userId);
+
+    res.status(StatusCodes.OK).json({
+        msg: "Trips fetched successfully",
+        data: result,
+        statusCode: StatusCodes.OK
+    });
 };
 
 export const getTripByIdController = async (req: Request, res: CustomResponse<any>) => {
