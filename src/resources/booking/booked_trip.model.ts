@@ -3,8 +3,12 @@ import { ITrip, ITripLoger, IEvents, tripStatus, transportType, Accommodation, t
 
 export interface ITripDocument extends ITrip, Document {}
 
-const TripSchema: Schema = new Schema(
-    {
+const BookedTripSchema: Schema = new Schema({
+    tripId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Trip',
+        required: true,
+    },
     name: {
         type: String,
         required: true
@@ -90,4 +94,4 @@ const TripSchema: Schema = new Schema(
     timestamps: true
 });
 
-export const Trip = mongoose.model<ITripDocument>('Trip', TripSchema);
+export const BookedTrip = mongoose.model<ITripDocument>('BookedTrip', BookedTripSchema);

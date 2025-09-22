@@ -9,12 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTripsByStatusController = exports.deleteTripController = exports.updateTripController = exports.getTripByIdController = exports.getAllTripsHistoryController = exports.getAllTripsController = exports.createTripController = void 0;
+exports.analyticsController = exports.getTripsByStatusController = exports.deleteTripController = exports.updateTripController = exports.getTripByIdController = exports.getAllTripsHistoryController = exports.getAllTripsController = exports.bookTripController = exports.createTripController = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const booking_service_1 = require("./booking.service");
 const createTripController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const files = req.file ? [req.file] : undefined;
-    const payload = Object.assign(Object.assign({}, req.body), { userId: req['user']._id });
+    const payload = Object.assign(Object.assign({}, req.body), { userId: req['user']._id, creator: "Admin" });
     const trip = yield (0, booking_service_1.createTripService)(payload, files);
     res.status(http_status_codes_1.StatusCodes.CREATED).json({
         msg: "Trip created successfully",
@@ -23,6 +23,17 @@ const createTripController = (req, res) => __awaiter(void 0, void 0, void 0, fun
     });
 });
 exports.createTripController = createTripController;
+const bookTripController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const files = req.file ? [req.file] : undefined;
+    const payload = Object.assign(Object.assign({}, req.body), { userId: req['user']._id });
+    const trip = yield (0, booking_service_1.bookedTripService)(payload, files);
+    res.status(http_status_codes_1.StatusCodes.CREATED).json({
+        msg: "Trip created successfully",
+        data: trip,
+        statusCode: http_status_codes_1.StatusCodes.CREATED
+    });
+});
+exports.bookTripController = bookTripController;
 const getAllTripsController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -90,3 +101,12 @@ const getTripsByStatusController = (req, res) => __awaiter(void 0, void 0, void 
     });
 });
 exports.getTripsByStatusController = getTripsByStatusController;
+const analyticsController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield (0, booking_service_1.analyticsService)();
+    res.status(http_status_codes_1.StatusCodes.OK).json({
+        msg: "Statistics fetched successfully",
+        data: response,
+        statusCode: http_status_codes_1.StatusCodes.OK
+    });
+});
+exports.analyticsController = analyticsController;

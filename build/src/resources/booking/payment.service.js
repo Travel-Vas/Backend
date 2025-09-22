@@ -17,6 +17,7 @@ const payment_interface_1 = require("./payment.interface");
 const App_1 = require("../../helpers/lib/App");
 const http_status_codes_1 = require("http-status-codes");
 const uuid_1 = require("uuid");
+const booked_trip_model_1 = require("./booked_trip.model");
 class PaymentService {
     /**
      * Initialize full payment for a trip
@@ -27,48 +28,101 @@ class PaymentService {
                 const trip = yield booking_model_1.Trip.findOne({
                     _id: tripId
                 }).lean().exec();
-                if (!trip) {
+                const bookedTrip = yield booked_trip_model_1.BookedTrip.findOne({
+                    _id: tripId
+                });
+                if (!trip && !bookedTrip) {
                     throw new App_1.CustomError({
                         message: 'Trip not found',
                         code: http_status_codes_1.StatusCodes.NOT_FOUND
                     });
                 }
-                const amount = Number(trip.tripCost) * 100; // Convert to kobo
-                const reference = `trip_full_${tripId}_${(0, uuid_1.v4)()}`;
-                // Initialize payment with Paystack
-                const paymentData = {
-                    email,
-                    amount,
-                    name: `${trip.name} - Full Payment`,
-                    reference,
-                    currency: 'NGN',
-                    callback_url: `${process.env.APP_URL}/dashboard/download`,
-                    metadata: {
+                if (trip) {
+                    const amount = Number(trip.tripCost) * 100; // Convert to kobo
+                    const reference = `trip_full_${tripId}_${(0, uuid_1.v4)()}`;
+                    // Initialize payment with Paystack
+                    const paymentData = {
+                        email,
+                        amount,
+                        name: `${trip.name} - Full Payment`,
+                        reference,
+                        currency: 'NGN',
+                        callback_url: `${process.env.APP_URL}/dashboard/download`,
+                        metadata: {
+                            tripId,
+                            userId,
+                            paymentType: payment_interface_1.PaymentType.FULL,
+                            tripName: trip.name,
+                            destination: trip.destination
+                        }
+                    };
+                    const response = yield paystack_1.paystack.transaction.initialize(paymentData);
+                    if (!response) {
+                        throw new App_1.CustomError({
+                            message: 'Failed to initialize payment',
+                            code: http_status_codes_1.StatusCodes.BAD_REQUEST
+                        });
+                    }
+                    // Save payment record
+                    yield payment_model_1.Payment.create({
                         tripId,
                         userId,
+                        reference,
+                        amount: amount / 100, // Store in Naira
                         paymentType: payment_interface_1.PaymentType.FULL,
-                        tripName: trip.name,
-                        destination: trip.destination
-                    }
-                };
-                const response = yield paystack_1.paystack.transaction.initialize(paymentData);
-                if (!response) {
-                    throw new App_1.CustomError({
-                        message: 'Failed to initialize payment',
-                        code: http_status_codes_1.StatusCodes.BAD_REQUEST
+                        status: payment_interface_1.PaymentStatus.PENDING,
+                        metadata: paymentData.metadata
                     });
+                    return response;
                 }
-                // Save payment record
-                yield payment_model_1.Payment.create({
-                    tripId,
-                    userId,
-                    reference,
-                    amount: amount / 100, // Store in Naira
-                    paymentType: payment_interface_1.PaymentType.FULL,
-                    status: payment_interface_1.PaymentStatus.PENDING,
-                    metadata: paymentData.metadata
-                });
-                return response;
+                else {
+                    const tripDetails = yield booking_model_1.Trip.findOne({
+                        _id: bookedTrip.tripId
+                    });
+                    const amount = Number(tripDetails.tripCost) * 100; // Convert to kobo
+                    const reference = `trip_full_${tripId}_${(0, uuid_1.v4)()}`;
+                    // Initialize payment with Paystack
+                    const paymentData = {
+                        email,
+                        amount,
+                        name: `${tripDetails.name} - Full Payment`,
+                        reference,
+                        currency: 'NGN',
+                        callback_url: `${process.env.APP_URL}/dashboard/download`,
+                        metadata: {
+                            tripId,
+                            userId,
+                            paymentType: payment_interface_1.PaymentType.FULL,
+                            tripName: tripDetails.name,
+                            destination: tripDetails.destination
+                        }
+                    };
+                    yield booked_trip_model_1.BookedTrip.findOneAndUpdate({
+                        _id: tripId
+                    }, {
+                        status: payment_interface_1.PaymentStatus.PENDING
+                    }, {
+                        new: true
+                    });
+                    const response = yield paystack_1.paystack.transaction.initialize(paymentData);
+                    if (!response) {
+                        throw new App_1.CustomError({
+                            message: 'Failed to initialize payment',
+                            code: http_status_codes_1.StatusCodes.BAD_REQUEST
+                        });
+                    }
+                    // Save payment record
+                    yield payment_model_1.Payment.create({
+                        tripId,
+                        userId,
+                        reference,
+                        amount: amount / 100, // Store in Naira
+                        paymentType: payment_interface_1.PaymentType.FULL,
+                        status: payment_interface_1.PaymentStatus.PENDING,
+                        metadata: paymentData.metadata
+                    });
+                    return response;
+                }
             }
             catch (error) {
                 if (error instanceof App_1.CustomError)

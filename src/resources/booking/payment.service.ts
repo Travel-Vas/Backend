@@ -12,6 +12,7 @@ import {
 import { CustomError } from '../../helpers/lib/App';
 import { StatusCodes } from 'http-status-codes';
 import { v4 as uuidv4 } from 'uuid';
+import {BookedTrip} from "./booked_trip.model";
 
 export class PaymentService {
     
@@ -23,52 +24,108 @@ export class PaymentService {
             const trip = await Trip.findOne({
                 _id:tripId
             }).lean().exec();
-            if (!trip) {
+            const bookedTrip:any = await BookedTrip.findOne({
+                _id: tripId
+            })
+            if (!trip && !bookedTrip) {
                 throw new CustomError({
                     message: 'Trip not found',
                     code: StatusCodes.NOT_FOUND
                 });
             }
-            const amount = Number(trip.tripCost) * 100 // Convert to kobo
-            const reference = `trip_full_${tripId}_${uuidv4()}`;
 
-            // Initialize payment with Paystack
-            const paymentData: IPaymentInitialize = {
-                email,
-                amount,
-                name: `${trip.name} - Full Payment`,
-                reference,
-                currency: 'NGN',
-                callback_url: `${process.env.APP_URL}/dashboard/download`,
-                metadata: {
+            if(trip){
+                const amount = Number(trip.tripCost) * 100 // Convert to kobo
+                const reference = `trip_full_${tripId}_${uuidv4()}`;
+
+                // Initialize payment with Paystack
+                const paymentData: IPaymentInitialize = {
+                    email,
+                    amount,
+                    name: `${trip.name} - Full Payment`,
+                    reference,
+                    currency: 'NGN',
+                    callback_url: `${process.env.APP_URL}/dashboard/download`,
+                    metadata: {
+                        tripId,
+                        userId,
+                        paymentType: PaymentType.FULL,
+                        tripName: trip.name,
+                        destination: trip.destination
+                    }
+                }
+
+                const response = await paystack.transaction.initialize(paymentData);
+                if (!response) {
+                    throw new CustomError({
+                        message: 'Failed to initialize payment',
+                        code: StatusCodes.BAD_REQUEST
+                    });
+                }
+
+                // Save payment record
+                await Payment.create({
                     tripId,
                     userId,
+                    reference,
+                    amount: amount / 100, // Store in Naira
                     paymentType: PaymentType.FULL,
-                    tripName: trip.name,
-                    destination: trip.destination
-                }
-            }
-
-            const response = await paystack.transaction.initialize(paymentData);
-            if (!response) {
-                throw new CustomError({
-                    message: 'Failed to initialize payment',
-                    code: StatusCodes.BAD_REQUEST
+                    status: PaymentStatus.PENDING,
+                    metadata: paymentData.metadata
                 });
+
+                return response;
+            }else {
+                const tripDetails:any = await Trip.findOne({
+                    _id: bookedTrip.tripId
+                })
+                const amount = Number(tripDetails.tripCost) * 100 // Convert to kobo
+                const reference = `trip_full_${tripId}_${uuidv4()}`;
+
+                // Initialize payment with Paystack
+                const paymentData: IPaymentInitialize = {
+                    email,
+                    amount,
+                    name: `${tripDetails.name} - Full Payment`,
+                    reference,
+                    currency: 'NGN',
+                    callback_url: `${process.env.APP_URL}/dashboard/download`,
+                    metadata: {
+                        tripId,
+                        userId,
+                        paymentType: PaymentType.FULL,
+                        tripName: tripDetails.name,
+                        destination: tripDetails.destination
+                    }
+                }
+            await BookedTrip.findOneAndUpdate({
+                    _id: tripId
+                }, {
+            status: PaymentStatus.PENDING
+            }, {
+        new: true
+        })
+                const response = await paystack.transaction.initialize(paymentData);
+                if (!response) {
+                    throw new CustomError({
+                        message: 'Failed to initialize payment',
+                        code: StatusCodes.BAD_REQUEST
+                    });
+                }
+
+                // Save payment record
+                await Payment.create({
+                    tripId,
+                    userId,
+                    reference,
+                    amount: amount / 100, // Store in Naira
+                    paymentType: PaymentType.FULL,
+                    status: PaymentStatus.PENDING,
+                    metadata: paymentData.metadata
+                });
+
+                return response;
             }
-
-            // Save payment record
-            await Payment.create({
-                tripId,
-                userId,
-                reference,
-                amount: amount / 100, // Store in Naira
-                paymentType: PaymentType.FULL,
-                status: PaymentStatus.PENDING,
-                metadata: paymentData.metadata
-            });
-
-            return response;
         } catch (error: any) {
             if (error instanceof CustomError) throw error;
             throw new CustomError({

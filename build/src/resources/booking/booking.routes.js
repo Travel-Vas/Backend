@@ -11,6 +11,8 @@ const router = (0, express_1.Router)();
  * @access Private
  */
 router.post('/', middlewares_1.authenticate, documentUpload_1.documentUpload.single('document'), booking_controller_1.createTripController);
+router.post('/book-trip', middlewares_1.authenticate, documentUpload_1.documentUpload.single('document'), booking_controller_1.bookTripController);
+router.get('/admin/analytics', middlewares_1.authenticate, booking_controller_1.analyticsController);
 /**
  * @route GET /api/trips
  * @desc Get all trips with pagination

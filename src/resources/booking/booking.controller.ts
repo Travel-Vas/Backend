@@ -5,7 +5,7 @@ import {
     getTripByIdService,
     updateTripService,
     deleteTripService,
-    getTripsByStatusService, getAllTripsHistoryService, getAllTripsService
+    getTripsByStatusService, getAllTripsHistoryService, getAllTripsService, bookedTripService, analyticsService
 } from './booking.service';
 import { CustomResponse } from '../../helpers/lib/App';
 
@@ -13,7 +13,8 @@ export const createTripController = async (req: Request, res: CustomResponse<any
         const files = req.file ? [req.file] : undefined;
         const payload = {
             ...req.body,
-            userId: req['user']._id
+            userId: req['user']._id,
+            creator:"Admin"
         };
 
         const trip = await createTripService(payload, files);
@@ -24,7 +25,21 @@ export const createTripController = async (req: Request, res: CustomResponse<any
             statusCode: StatusCodes.CREATED
         });
 };
+export const bookTripController = async (req: Request, res: CustomResponse<any>) => {
+    const files = req.file ? [req.file] : undefined;
+    const payload = {
+        ...req.body,
+        userId: req['user']._id
+    };
 
+    const trip = await bookedTripService(payload, files);
+
+    res.status(StatusCodes.CREATED).json({
+        msg: "Trip created successfully",
+        data: trip,
+        statusCode: StatusCodes.CREATED
+    });
+};
 export const getAllTripsController = async (req: Request, res: CustomResponse<any>) => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
@@ -101,3 +116,11 @@ export const getTripsByStatusController = async (req: Request, res: CustomRespon
         });
 
 };
+export const analyticsController = async (req: Request, res: CustomResponse<any>) => {
+    const response = await analyticsService()
+    res.status(StatusCodes.OK).json({
+        msg: "Statistics fetched successfully",
+        data: response,
+        statusCode: StatusCodes.OK
+    });
+}
