@@ -85,7 +85,7 @@ const _verifyAccount = (user_email, otp) => __awaiter(void 0, void 0, void 0, fu
         });
     }
     // //send welcome Email
-    yield new App_1.EmailService().welcome("Welcome To Fotolocker", user.email, user.name.split(" ")[0]);
+    yield new App_1.EmailService().welcome("Welcome To Travelvas", user.email, user.name.split(" ")[0]);
     yield client.del(user.email);
     const accessToken = (0, App_1.createToken)(user.id, user.role, "1d");
     const refreshToken = (0, App_1.createToken)(user.id, user.role, "30d");

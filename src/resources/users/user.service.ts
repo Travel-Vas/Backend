@@ -106,7 +106,7 @@ export const _verifyAccount: IVerifyAccount = async (user_email, otp) => {
   }
   // //send welcome Email
   await new EmailService().welcome(
-    "Welcome To Fotolocker",
+    "Welcome To Travelvas",
     user.email,
     user.name.split(" ")[0]
   );
