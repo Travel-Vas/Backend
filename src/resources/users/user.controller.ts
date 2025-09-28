@@ -12,7 +12,7 @@ import {
   _signup,
   _updatePassword,
   _updateProfile,
-  _verifyAccount, changePasswordService,
+  _verifyAccount, changePasswordService, totalUsersService,
   unboardingService,
 } from './user.service';
 import {CustomError, CustomResponse} from '../../helpers/lib/App';
@@ -216,20 +216,7 @@ export const refreshTokenController = async (req: Request, res: CustomResponse<a
 
   res.status(200).json({ data: { token: tokens.access_token }, statusCode: 200 })
 }
-
-export const fetchAllCoodinator = async (req:Request, res: CustomResponse<any>)=> {
-  const response = await _allCoordinatorsService()
-    return res.json({
-         msg: "OK",
-         data: response || [],
-         statusCode: StatusCodes.OK
-       })
-}
-export const deleteCoodinator = async (req:Request, res: CustomResponse<any>)=> {
-  const response = await _deleteCoordinatorsService(req.query.id, req.query.flag as string, req.query.delete)
-    return res.json({
-         msg: "OK",
-         data: response || [],
-         statusCode: StatusCodes.OK
-       })
+export const totalUsersController = async (req:Request, res:CustomResponse<any>) => {
+  const data = await totalUsersService()
+  res.json({ data, msg: "Successful" })
 }

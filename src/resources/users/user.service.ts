@@ -618,3 +618,15 @@ export const changePasswordService = async (payload: {
     });
   }
 };
+export const totalUsersService = async ()=> {
+    try {
+      const response = await UserModel.find()
+      return response
+    }catch(error:any){
+      console.log(error)
+      throw new CustomError({
+        message: error.message,
+        code: error.code,
+      })
+    }
+}

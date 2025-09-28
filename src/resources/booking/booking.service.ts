@@ -112,11 +112,12 @@ export const getAllTripsHistoryService = async (page: number = 1, limit: number 
             const tripDetails = await Trip.findOne({
                 _id: trip.tripId
             })
-            adminTrips.push(tripDetails)
+            if (tripDetails) {
+                adminTrips.push(tripDetails);
+            }
         }
         const total = await Trip.countDocuments();
         const pages = Math.ceil(total / limit);
-
         return { trips:adminTrips, total, pages };
     } catch (error: any) {
         throw new CustomError({
@@ -226,6 +227,36 @@ export const getTripsByStatusService = async (status: string, page: number = 1, 
         });
     }
 };
+export const getRecentBookedTripsService = async (
+    page: number = 1, 
+    limit: number = 10, 
+    userId?: string
+): Promise<{ bookings: ITripDocument[], total: number, pages: number }> => {
+    try {
+        const skip = (page - 1) * limit;
+        
+        const query = userId ? { userId } : {};
+        
+        const bookings = await BookedTrip.find(query)
+            .populate('tripId', 'name destination')
+            .populate('userId', 'firstName lastName email')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        const total = await BookedTrip.countDocuments(query);
+        const pages = Math.ceil(total / limit);
+
+        return { bookings, total, pages };
+    } catch (error: any) {
+        throw new CustomError({
+            message: error.message || 'Failed to fetch recent booked trips',
+            code: StatusCodes.INTERNAL_SERVER_ERROR
+        });
+    }
+};
+
 export const analyticsService = async () => {
     const [totalEvents, totalUsers, totalTrips, totalPayments] = await Promise.all([
         Trip.countDocuments(),

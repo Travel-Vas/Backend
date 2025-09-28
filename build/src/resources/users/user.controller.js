@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCoodinator = exports.fetchAllCoodinator = exports.refreshTokenController = exports.logoutController = exports.deleteAccountController = exports.updatePasswordController = exports.changePasswordController = exports.unboardingController = exports.updateAdminProfileController = exports.updateProfileController = exports.getAdminProfileController = exports.getProfileController = exports.loginController = exports.actual_resetPasswordController = exports.resetPasswordController = exports.forgotPasswordController = exports.resendOTPController = exports.verifyAccountController = exports.signupController = void 0;
+exports.totalUsersController = exports.refreshTokenController = exports.logoutController = exports.deleteAccountController = exports.updatePasswordController = exports.changePasswordController = exports.unboardingController = exports.updateAdminProfileController = exports.updateProfileController = exports.getAdminProfileController = exports.getProfileController = exports.loginController = exports.actual_resetPasswordController = exports.resetPasswordController = exports.forgotPasswordController = exports.resendOTPController = exports.verifyAccountController = exports.signupController = void 0;
 const user_service_1 = require("./user.service");
 const App_1 = require("../../helpers/lib/App");
 const status_codes_1 = require("http-status-codes/build/cjs/status-codes");
@@ -194,21 +194,8 @@ const refreshTokenController = (req, res) => __awaiter(void 0, void 0, void 0, f
     res.status(200).json({ data: { token: tokens.access_token }, statusCode: 200 });
 });
 exports.refreshTokenController = refreshTokenController;
-const fetchAllCoodinator = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield (0, user_service_1._allCoordinatorsService)();
-    return res.json({
-        msg: "OK",
-        data: response || [],
-        statusCode: status_codes_1.StatusCodes.OK
-    });
+const totalUsersController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield (0, user_service_1.totalUsersService)();
+    res.json({ data, msg: "Successful" });
 });
-exports.fetchAllCoodinator = fetchAllCoodinator;
-const deleteCoodinator = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield (0, user_service_1._deleteCoordinatorsService)(req.query.id, req.query.flag, req.query.delete);
-    return res.json({
-        msg: "OK",
-        data: response || [],
-        statusCode: status_codes_1.StatusCodes.OK
-    });
-});
-exports.deleteCoodinator = deleteCoodinator;
+exports.totalUsersController = totalUsersController;

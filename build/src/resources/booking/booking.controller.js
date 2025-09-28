@@ -9,13 +9,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.analyticsController = exports.getTripsByStatusController = exports.deleteTripController = exports.updateTripController = exports.getTripByIdController = exports.getAllTripsHistoryController = exports.getAllTripsController = exports.bookTripController = exports.createTripController = void 0;
+exports.analyticsController = exports.getRecentBookedTripsController = exports.getTripsByStatusController = exports.deleteTripController = exports.updateTripController = exports.getTripByIdController = exports.getAllTripsHistoryController = exports.getAllTripsController = exports.bookTripController = exports.createTripController = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const booking_service_1 = require("./booking.service");
+const notification_service_1 = require("../notifications/notification.service");
+const notification_model_1 = require("../notifications/notification.model");
 const createTripController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const files = req.file ? [req.file] : undefined;
     const payload = Object.assign(Object.assign({}, req.body), { userId: req['user']._id, creator: "Admin" });
     const trip = yield (0, booking_service_1.createTripService)(payload, files);
+    yield (0, notification_service_1.createNotificationForAdmins)({
+        type: notification_model_1.NotificationType.TRIP_CREATED,
+        title: 'New Trip Created',
+        message: `A new trip "${trip.name}" to ${trip.destination} has been created by ${req['user'].name}`,
+        userId: req['user']._id,
+        tripId: trip._id.toString(),
+        metadata: {
+            tripName: trip.name,
+            destination: trip.destination,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            createdBy: req['user'].name
+        }
+    });
     res.status(http_status_codes_1.StatusCodes.CREATED).json({
         msg: "Trip created successfully",
         data: trip,
@@ -27,8 +43,27 @@ const bookTripController = (req, res) => __awaiter(void 0, void 0, void 0, funct
     const files = req.file ? [req.file] : undefined;
     const payload = Object.assign(Object.assign({}, req.body), { userId: req['user']._id });
     const trip = yield (0, booking_service_1.bookedTripService)(payload, files);
+    yield (0, notification_service_1.createNotificationForAdmins)({
+        type: notification_model_1.NotificationType.TRIP_BOOKED,
+        title: 'New Trip Booking',
+        message: `${req['user'].name} has booked a trip to ${trip.destination}`,
+        userId: req['user']._id,
+        bookingId: trip._id.toString(),
+        tripId: payload.tripId,
+        metadata: {
+            customerName: `${trip.firstName} ${trip.lastName}`,
+            customerEmail: trip.email,
+            customerPhone: trip.phoneNumber,
+            destination: trip.destination,
+            tripName: trip.name,
+            tripCost: trip.tripCost,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            bookedBy: req['user'].name
+        }
+    });
     res.status(http_status_codes_1.StatusCodes.CREATED).json({
-        msg: "Trip created successfully",
+        msg: "Trip booked successfully",
         data: trip,
         statusCode: http_status_codes_1.StatusCodes.CREATED
     });
@@ -101,6 +136,18 @@ const getTripsByStatusController = (req, res) => __awaiter(void 0, void 0, void 
     });
 });
 exports.getTripsByStatusController = getTripsByStatusController;
+const getRecentBookedTripsController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const userId = req.query.userId;
+    const result = yield (0, booking_service_1.getRecentBookedTripsService)(page, limit, userId);
+    res.status(http_status_codes_1.StatusCodes.OK).json({
+        msg: "Recent booked trips fetched successfully",
+        data: result,
+        statusCode: http_status_codes_1.StatusCodes.OK
+    });
+});
+exports.getRecentBookedTripsController = getRecentBookedTripsController;
 const analyticsController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield (0, booking_service_1.analyticsService)();
     res.status(http_status_codes_1.StatusCodes.OK).json({

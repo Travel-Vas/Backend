@@ -14,7 +14,7 @@ import {
   updateAdminProfileController,
   actual_resetPasswordController,
   unboardingController,
-  changePasswordController
+  changePasswordController, totalUsersController
 } from './user.controller';
 import {
   createUserSchema,
@@ -110,7 +110,7 @@ router.post("/change-password", authenticate, changePasswordController)
 router.route('/')
   .patch(authenticate, validationMiddleware(updateProfileSchema), profileUpload, updateProfileController)
   .get(authenticate, getProfileController)
-
+router.get("/total", authenticate, totalUsersController)
   router.patch("/:id", authenticate, updateAdminProfileController )
 
 export default { router, path: '/user' }

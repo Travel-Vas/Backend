@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.analyticsService = exports.getTripsByStatusService = exports.deleteTripService = exports.updateTripService = exports.getTripByIdService = exports.getAllTripsHistoryService = exports.getAllTripsService = exports.bookedTripService = exports.createTripService = void 0;
+exports.analyticsService = exports.getRecentBookedTripsService = exports.getTripsByStatusService = exports.deleteTripService = exports.updateTripService = exports.getTripByIdService = exports.getAllTripsHistoryService = exports.getAllTripsService = exports.bookedTripService = exports.createTripService = void 0;
 const booking_model_1 = require("./booking.model");
 const cloudinary_1 = require("../../utils/cloudinary");
 const App_1 = require("../../helpers/lib/App");
@@ -114,7 +114,9 @@ const getAllTripsHistoryService = (...args_1) => __awaiter(void 0, [...args_1], 
             const tripDetails = yield booking_model_1.Trip.findOne({
                 _id: trip.tripId
             });
-            adminTrips.push(tripDetails);
+            if (tripDetails) {
+                adminTrips.push(tripDetails);
+            }
         }
         const total = yield booking_model_1.Trip.countDocuments();
         const pages = Math.ceil(total / limit);
@@ -221,6 +223,29 @@ const getTripsByStatusService = (status_1, ...args_1) => __awaiter(void 0, [stat
     }
 });
 exports.getTripsByStatusService = getTripsByStatusService;
+const getRecentBookedTripsService = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (page = 1, limit = 10, userId) {
+    try {
+        const skip = (page - 1) * limit;
+        const query = userId ? { userId } : {};
+        const bookings = yield booked_trip_model_1.BookedTrip.find(query)
+            .populate('tripId', 'name destination')
+            .populate('userId', 'firstName lastName email')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+        const total = yield booked_trip_model_1.BookedTrip.countDocuments(query);
+        const pages = Math.ceil(total / limit);
+        return { bookings, total, pages };
+    }
+    catch (error) {
+        throw new App_1.CustomError({
+            message: error.message || 'Failed to fetch recent booked trips',
+            code: http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR
+        });
+    }
+});
+exports.getRecentBookedTripsService = getRecentBookedTripsService;
 const analyticsService = () => __awaiter(void 0, void 0, void 0, function* () {
     const [totalEvents, totalUsers, totalTrips, totalPayments] = yield Promise.all([
         booking_model_1.Trip.countDocuments(),

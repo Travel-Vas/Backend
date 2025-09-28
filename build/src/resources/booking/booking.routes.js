@@ -14,6 +14,15 @@ router.post('/', middlewares_1.authenticate, documentUpload_1.documentUpload.sin
 router.post('/book-trip', middlewares_1.authenticate, documentUpload_1.documentUpload.single('document'), booking_controller_1.bookTripController);
 router.get('/admin/analytics', middlewares_1.authenticate, booking_controller_1.analyticsController);
 /**
+ * @route GET /api/trips/recent-bookings
+ * @desc Get recent booked trips with pagination
+ * @access Private
+ * @query page - Page number (default: 1)
+ * @query limit - Items per page (default: 10)
+ * @query userId - Optional user ID to filter bookings
+ */
+router.get('/recent-bookings', middlewares_1.authenticate, booking_controller_1.getRecentBookedTripsController);
+/**
  * @route GET /api/trips
  * @desc Get all trips with pagination
  * @access Private

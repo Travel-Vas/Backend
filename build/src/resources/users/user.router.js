@@ -107,5 +107,6 @@ router.post("/change-password", middlewares_1.authenticate, user_controller_1.ch
 router.route('/')
     .patch(middlewares_1.authenticate, (0, validation_middleware_1.validationMiddleware)(user_validation_1.updateProfileSchema), exports.profileUpload, user_controller_1.updateProfileController)
     .get(middlewares_1.authenticate, user_controller_1.getProfileController);
+router.get("/total", middlewares_1.authenticate, user_controller_1.totalUsersController);
 router.patch("/:id", middlewares_1.authenticate, user_controller_1.updateAdminProfileController);
 exports.default = { router, path: '/user' };

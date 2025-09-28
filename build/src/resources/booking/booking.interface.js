@@ -27,4 +27,5 @@ var tripType;
     tripType["FAMILY"] = "FAMILY";
     tripType["BUSINESS"] = "BUSINESS";
     tripType["LEISURE"] = "LEISURE";
+    tripType["ADVENTURE"] = "ADVENTURE";
 })(tripType || (exports.tripType = tripType = {}));

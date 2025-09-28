@@ -5,7 +5,7 @@ import {
     getTripByIdController,
     updateTripController,
     deleteTripController,
-    getTripsByStatusController, getAllTripsHistoryController, bookTripController, analyticsController
+    getTripsByStatusController, getAllTripsHistoryController, bookTripController, analyticsController, getRecentBookedTripsController
 } from './booking.controller';
 import { documentUpload } from '../../middlewares/documentUpload';
 import {authenticate} from "../../middlewares";
@@ -20,6 +20,16 @@ const router = Router();
 router.post('/',authenticate, documentUpload.single('document'), createTripController);
 router.post('/book-trip',authenticate, documentUpload.single('document'), bookTripController);
 router.get('/admin/analytics', authenticate, analyticsController);
+
+/**
+ * @route GET /api/trips/recent-bookings
+ * @desc Get recent booked trips with pagination
+ * @access Private
+ * @query page - Page number (default: 1)
+ * @query limit - Items per page (default: 10)
+ * @query userId - Optional user ID to filter bookings
+ */
+router.get('/recent-bookings', authenticate, getRecentBookedTripsController);
 /**
  * @route GET /api/trips
  * @desc Get all trips with pagination

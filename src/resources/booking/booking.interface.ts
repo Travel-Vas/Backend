@@ -43,7 +43,8 @@ export enum tripType {
     GROUP = 'GROUP',
     FAMILY='FAMILY',
     BUSINESS='BUSINESS',
-    LEISURE='LEISURE'
+    LEISURE='LEISURE',
+    ADVENTURE='ADVENTURE',
 }
 
 export interface ITripLoger {

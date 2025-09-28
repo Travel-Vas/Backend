@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePasswordService = exports.unboardingService = exports._deleteCoordinatorsService = exports._allCoordinatorsService = exports._refreshToken = exports._deleteAccount = exports._updatePassword = exports._updateProfile = exports._login = exports._resetPassword = exports._resetOtp = exports._forgotPassword = exports._resendOTP = exports._verifyAccount = exports._signup = void 0;
+exports.totalUsersService = exports.changePasswordService = exports.unboardingService = exports._deleteCoordinatorsService = exports._allCoordinatorsService = exports._refreshToken = exports._deleteAccount = exports._updatePassword = exports._updateProfile = exports._login = exports._resetPassword = exports._resetOtp = exports._forgotPassword = exports._resendOTP = exports._verifyAccount = exports._signup = void 0;
 const user_model_1 = __importDefault(require("./user.model"));
 const user_model_2 = __importDefault(require("./user.model"));
 const App_1 = require("../../helpers/lib/App");
@@ -489,3 +489,17 @@ const changePasswordService = (payload) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.changePasswordService = changePasswordService;
+const totalUsersService = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield user_model_2.default.find();
+        return response;
+    }
+    catch (error) {
+        console.log(error);
+        throw new App_1.CustomError({
+            message: error.message,
+            code: error.code,
+        });
+    }
+});
+exports.totalUsersService = totalUsersService;
