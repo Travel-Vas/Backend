@@ -4,6 +4,7 @@ import { PaymentService } from './payment.service';
 import { CustomResponse } from '../../helpers/lib/App';
 import { IInstallmentPayment } from './payment.interface';
 import { Trip } from './booking.model';
+import crypto from 'crypto';
 
 export const initializeFullPaymentController = async (req: Request, res: CustomResponse<any>) => {
         const { tripId, email } = req.body;
@@ -167,20 +168,82 @@ export const processNextInstallmentController = async (req: Request, res: Custom
 };
 
 export const paystackWebhookController = async (req: Request, res: Response) => {
+    const startTime = Date.now();
+
     try {
         const payload = req.body;
-        
-        // Verify webhook signature (implement based on Paystack documentation)
-        const signature = req.headers['x-paystack-signature'];
-        
-        if (payload.event === 'charge.success') {
-            const reference = payload.data.reference;
-            await PaymentService.verifyPayment(reference);
+        const signature = req.headers['x-paystack-signature'] as string;
+
+        // Verify webhook signature
+        const secretKey = process.env.PAYSTACK_SECRET_KEY;
+        if (!secretKey) {
+            console.error('[Webhook] PAYSTACK_SECRET_KEY not configured');
+            return res.status(StatusCodes.OK).send('OK');
         }
+
+        const hash = crypto
+            .createHmac('sha512', secretKey)
+            .update(JSON.stringify(payload))
+            .digest('hex');
+
+        if (hash !== signature) {
+            console.error('[Webhook] Invalid signature', {
+                event: payload.event,
+                receivedSignature: signature?.substring(0, 10) + '...'
+            });
+            return res.status(StatusCodes.OK).send('OK');
+        }
+
+        console.log('[Webhook] Event received:', {
+            event: payload.event,
+            eventId: payload.data?.id,
+            reference: payload.data?.reference
+        });
+
+        // Handle different event types
+        switch (payload.event) {
+            case 'charge.success':
+                await PaymentService.handleChargeSuccess(payload.data);
+                break;
+
+            case 'charge.failed':
+                await PaymentService.handleChargeFailed(payload.data);
+                break;
+
+            case 'transfer.success':
+                await PaymentService.handleTransferSuccess(payload.data);
+                break;
+
+            case 'transfer.failed':
+            case 'transfer.reversed':
+                await PaymentService.handleTransferFailed(payload.data);
+                break;
+
+            case 'refund.pending':
+            case 'refund.processed':
+            case 'refund.failed':
+                await PaymentService.handleRefund(payload.event, payload.data);
+                break;
+
+            default:
+                console.log('[Webhook] Unhandled event type:', payload.event);
+        }
+
+        const duration = Date.now() - startTime;
+        console.log('[Webhook] Processed successfully', {
+            event: payload.event,
+            duration: `${duration}ms`
+        });
 
         res.status(StatusCodes.OK).send('OK');
     } catch (error: any) {
-        console.error('Webhook error:', error);
-        res.status(StatusCodes.OK).send('OK'); // Always respond with 200 to Paystack
+        const duration = Date.now() - startTime;
+        console.error('[Webhook] Error:', {
+            error: error.message,
+            stack: error.stack,
+            duration: `${duration}ms`
+        });
+        // Always respond with 200 to prevent Paystack from retrying
+        res.status(StatusCodes.OK).send('OK');
     }
 };

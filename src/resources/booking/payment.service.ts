@@ -245,10 +245,10 @@ export class PaymentService {
                 await payment.save();
 
                 // If this is a successful installment payment, create next installment record
-                if (payment.paymentType === PaymentType.INSTALLMENT && 
+                if (payment.paymentType === PaymentType.INSTALLMENT &&
                     payment.status === PaymentStatus.SUCCESS &&
                     payment.installmentNumber! < payment.totalInstallments!) {
-                    
+
                     await this.createNextInstallmentRecord(payment);
                 }
             }
@@ -260,6 +260,168 @@ export class PaymentService {
                 message: error.message || 'Payment verification failed',
                 code: StatusCodes.INTERNAL_SERVER_ERROR
             });
+        }
+    }
+
+    /**
+     * Handle successful charge webhook event
+     */
+    static async handleChargeSuccess(data: any): Promise<void> {
+        try {
+            const { reference, id: eventId } = data;
+
+            // Check for duplicate webhook event
+            const existingPayment = await Payment.findOne({
+                reference,
+                webhookEventId: eventId
+            });
+
+            if (existingPayment) {
+                console.log('[Webhook] Duplicate event detected:', { reference, eventId });
+                return;
+            }
+
+            // Find payment by reference
+            const payment: any = await Payment.findOne({ reference });
+            if (!payment) {
+                console.warn('[Webhook] Payment not found:', reference);
+                return;
+            }
+
+            // Update payment status
+            payment.status = PaymentStatus.SUCCESS;
+            payment.paystackResponse = data;
+            payment.paidAt = new Date(data.paid_at);
+            payment.webhookProcessed = true;
+            payment.webhookEventId = eventId;
+            await payment.save();
+
+            // Update trip/booking status
+            await BookedTrip.findOneAndUpdate(
+                { _id: payment.tripId },
+                { status: PaymentStatus.SUCCESS },
+                { new: true }
+            );
+
+            // Handle installment logic
+            if (payment.paymentType === PaymentType.INSTALLMENT &&
+                payment.installmentNumber < payment.totalInstallments) {
+                await this.createNextInstallmentRecord(payment);
+            }
+
+            console.log('[Webhook] Charge success processed:', { reference, eventId });
+        } catch (error: any) {
+            console.error('[Webhook] Error processing charge.success:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Handle failed charge webhook event
+     */
+    static async handleChargeFailed(data: any): Promise<void> {
+        try {
+            const { reference, id: eventId } = data;
+
+            // Check for duplicate
+            const existingPayment = await Payment.findOne({
+                reference,
+                webhookEventId: eventId
+            });
+
+            if (existingPayment) {
+                console.log('[Webhook] Duplicate event detected:', { reference, eventId });
+                return;
+            }
+
+            // Find and update payment
+            const payment: any = await Payment.findOne({ reference });
+            if (!payment) {
+                console.warn('[Webhook] Payment not found:', reference);
+                return;
+            }
+
+            payment.status = PaymentStatus.FAILED;
+            payment.paystackResponse = data;
+            payment.webhookProcessed = true;
+            payment.webhookEventId = eventId;
+            await payment.save();
+
+            // Update trip/booking status
+            await BookedTrip.findOneAndUpdate(
+                { _id: payment.tripId },
+                { status: PaymentStatus.FAILED },
+                { new: true }
+            );
+
+            console.log('[Webhook] Charge failed processed:', { reference, eventId });
+        } catch (error: any) {
+            console.error('[Webhook] Error processing charge.failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Handle successful transfer webhook event
+     */
+    static async handleTransferSuccess(data: any): Promise<void> {
+        try {
+            console.log('[Webhook] Transfer success:', {
+                transferCode: data.transfer_code,
+                recipient: data.recipient,
+                amount: data.amount / 100
+            });
+            // Add custom transfer logic here if needed
+        } catch (error: any) {
+            console.error('[Webhook] Error processing transfer.success:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Handle failed/reversed transfer webhook event
+     */
+    static async handleTransferFailed(data: any): Promise<void> {
+        try {
+            console.log('[Webhook] Transfer failed/reversed:', {
+                transferCode: data.transfer_code,
+                recipient: data.recipient,
+                amount: data.amount / 100
+            });
+            // Add custom transfer failure logic here if needed
+        } catch (error: any) {
+            console.error('[Webhook] Error processing transfer failure:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Handle refund webhook events
+     */
+    static async handleRefund(eventType: string, data: any): Promise<void> {
+        try {
+            const { transaction_reference, status } = data;
+
+            console.log('[Webhook] Refund event:', {
+                eventType,
+                reference: transaction_reference,
+                status
+            });
+
+            // Find payment by reference
+            const payment = await Payment.findOne({ reference: transaction_reference });
+            if (payment) {
+                payment.paystackResponse = {
+                    ...payment.paystackResponse,
+                    refund: data
+                };
+                await payment.save();
+            }
+
+            // Add custom refund logic here
+        } catch (error: any) {
+            console.error('[Webhook] Error processing refund:', error);
+            throw error;
         }
     }
 

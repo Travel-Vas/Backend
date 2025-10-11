@@ -15,6 +15,8 @@ export interface IPaymentDocument extends Document {
     metadata?: any;
     paidAt?: Date;
     nextPaymentDate?: Date;
+    webhookProcessed?: boolean;
+    webhookEventId?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -79,10 +81,18 @@ const PaymentSchema: Schema = new Schema({
     nextPaymentDate: {
         type: Date,
         required: function(this: IPaymentDocument) {
-            return this.paymentType === PaymentType.INSTALLMENT && 
-                   this.status === PaymentStatus.SUCCESS && 
+            return this.paymentType === PaymentType.INSTALLMENT &&
+                   this.status === PaymentStatus.SUCCESS &&
                    this.installmentNumber! < this.totalInstallments!;
         }
+    },
+    webhookProcessed: {
+        type: Boolean,
+        default: false
+    },
+    webhookEventId: {
+        type: String,
+        sparse: true
     }
 }, {
     timestamps: true
@@ -92,5 +102,6 @@ PaymentSchema.index({ tripId: 1, userId: 1 });
 PaymentSchema.index({ reference: 1 });
 PaymentSchema.index({ status: 1 });
 PaymentSchema.index({ paymentType: 1 });
+PaymentSchema.index({ webhookEventId: 1 });
 
 export const Payment = mongoose.model<IPaymentDocument>('Payment', PaymentSchema);

@@ -256,6 +256,151 @@ class PaymentService {
         });
     }
     /**
+     * Handle successful charge webhook event
+     */
+    static handleChargeSuccess(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { reference, id: eventId } = data;
+                // Check for duplicate webhook event
+                const existingPayment = yield payment_model_1.Payment.findOne({
+                    reference,
+                    webhookEventId: eventId
+                });
+                if (existingPayment) {
+                    console.log('[Webhook] Duplicate event detected:', { reference, eventId });
+                    return;
+                }
+                // Find payment by reference
+                const payment = yield payment_model_1.Payment.findOne({ reference });
+                if (!payment) {
+                    console.warn('[Webhook] Payment not found:', reference);
+                    return;
+                }
+                // Update payment status
+                payment.status = payment_interface_1.PaymentStatus.SUCCESS;
+                payment.paystackResponse = data;
+                payment.paidAt = new Date(data.paid_at);
+                payment.webhookProcessed = true;
+                payment.webhookEventId = eventId;
+                yield payment.save();
+                // Update trip/booking status
+                yield booked_trip_model_1.BookedTrip.findOneAndUpdate({ _id: payment.tripId }, { status: payment_interface_1.PaymentStatus.SUCCESS }, { new: true });
+                // Handle installment logic
+                if (payment.paymentType === payment_interface_1.PaymentType.INSTALLMENT &&
+                    payment.installmentNumber < payment.totalInstallments) {
+                    yield this.createNextInstallmentRecord(payment);
+                }
+                console.log('[Webhook] Charge success processed:', { reference, eventId });
+            }
+            catch (error) {
+                console.error('[Webhook] Error processing charge.success:', error);
+                throw error;
+            }
+        });
+    }
+    /**
+     * Handle failed charge webhook event
+     */
+    static handleChargeFailed(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { reference, id: eventId } = data;
+                // Check for duplicate
+                const existingPayment = yield payment_model_1.Payment.findOne({
+                    reference,
+                    webhookEventId: eventId
+                });
+                if (existingPayment) {
+                    console.log('[Webhook] Duplicate event detected:', { reference, eventId });
+                    return;
+                }
+                // Find and update payment
+                const payment = yield payment_model_1.Payment.findOne({ reference });
+                if (!payment) {
+                    console.warn('[Webhook] Payment not found:', reference);
+                    return;
+                }
+                payment.status = payment_interface_1.PaymentStatus.FAILED;
+                payment.paystackResponse = data;
+                payment.webhookProcessed = true;
+                payment.webhookEventId = eventId;
+                yield payment.save();
+                // Update trip/booking status
+                yield booked_trip_model_1.BookedTrip.findOneAndUpdate({ _id: payment.tripId }, { status: payment_interface_1.PaymentStatus.FAILED }, { new: true });
+                console.log('[Webhook] Charge failed processed:', { reference, eventId });
+            }
+            catch (error) {
+                console.error('[Webhook] Error processing charge.failed:', error);
+                throw error;
+            }
+        });
+    }
+    /**
+     * Handle successful transfer webhook event
+     */
+    static handleTransferSuccess(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('[Webhook] Transfer success:', {
+                    transferCode: data.transfer_code,
+                    recipient: data.recipient,
+                    amount: data.amount / 100
+                });
+                // Add custom transfer logic here if needed
+            }
+            catch (error) {
+                console.error('[Webhook] Error processing transfer.success:', error);
+                throw error;
+            }
+        });
+    }
+    /**
+     * Handle failed/reversed transfer webhook event
+     */
+    static handleTransferFailed(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('[Webhook] Transfer failed/reversed:', {
+                    transferCode: data.transfer_code,
+                    recipient: data.recipient,
+                    amount: data.amount / 100
+                });
+                // Add custom transfer failure logic here if needed
+            }
+            catch (error) {
+                console.error('[Webhook] Error processing transfer failure:', error);
+                throw error;
+            }
+        });
+    }
+    /**
+     * Handle refund webhook events
+     */
+    static handleRefund(eventType, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { transaction_reference, status } = data;
+                console.log('[Webhook] Refund event:', {
+                    eventType,
+                    reference: transaction_reference,
+                    status
+                });
+                // Find payment by reference
+                const payment = yield payment_model_1.Payment.findOne({ reference: transaction_reference });
+                if (payment) {
+                    payment.paystackResponse = Object.assign(Object.assign({}, payment.paystackResponse), { refund: data });
+                    yield payment.save();
+                }
+                // Add custom refund logic here
+            }
+            catch (error) {
+                console.error('[Webhook] Error processing refund:', error);
+                throw error;
+            }
+        });
+    }
+    /**
      * Create next installment payment record
      */
     static createNextInstallmentRecord(currentPayment) {

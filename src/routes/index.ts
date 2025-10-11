@@ -4,11 +4,13 @@ import SettingsRoutes from "../resources/settings/settings.routes";
 import BookingRoutes from "../resources/booking/booking.routes";
 import PaymentRoutes from "../resources/booking/payment.routes";
 import NotificationRoutes from "../resources/notifications/notification.routes";
+import GhanaTripRoutes from "../resources/ghana_trip/ghana_trip.routes";
 
 export default [
   userRouter,
   SettingsRoutes,
   BookingRoutes,
   PaymentRoutes,
-  NotificationRoutes
+  NotificationRoutes,
+  GhanaTripRoutes
 ];

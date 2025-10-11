@@ -90,6 +90,14 @@ const PaymentSchema = new mongoose_1.Schema({
                 this.status === payment_interface_1.PaymentStatus.SUCCESS &&
                 this.installmentNumber < this.totalInstallments;
         }
+    },
+    webhookProcessed: {
+        type: Boolean,
+        default: false
+    },
+    webhookEventId: {
+        type: String,
+        sparse: true
     }
 }, {
     timestamps: true
@@ -98,4 +106,5 @@ PaymentSchema.index({ tripId: 1, userId: 1 });
 PaymentSchema.index({ reference: 1 });
 PaymentSchema.index({ status: 1 });
 PaymentSchema.index({ paymentType: 1 });
+PaymentSchema.index({ webhookEventId: 1 });
 exports.Payment = mongoose_1.default.model('Payment', PaymentSchema);
