@@ -194,20 +194,34 @@ export const paystackWebhookController = async (req: Request, res: Response) => 
             return res.status(StatusCodes.OK).send('OK');
         }
 
+        // Check if this is a Ghana trip payment by reference prefix
+        const isGhanaTrip = payload.data?.reference?.startsWith('ghana_trip_');
+
         console.log('[Webhook] Event received:', {
             event: payload.event,
             eventId: payload.data?.id,
-            reference: payload.data?.reference
+            reference: payload.data?.reference,
+            handler: isGhanaTrip ? 'GhanaTripService' : 'PaymentService'
         });
 
-        // Handle different event types
         switch (payload.event) {
             case 'charge.success':
-                await PaymentService.handleChargeSuccess(payload.data);
+                if (isGhanaTrip) {
+                    // Import GhanaTripService dynamically to avoid circular dependencies
+                    const { GhanaTripService } = await import('../ghana_trip/ghana_trip.service');
+                    await GhanaTripService.handlePaymentSuccess(payload.data);
+                } else {
+                    await PaymentService.handleChargeSuccess(payload.data);
+                }
                 break;
 
             case 'charge.failed':
-                await PaymentService.handleChargeFailed(payload.data);
+                if (isGhanaTrip) {
+                    const { GhanaTripService } = await import('../ghana_trip/ghana_trip.service');
+                    await GhanaTripService.handlePaymentFailed(payload.data);
+                } else {
+                    await PaymentService.handleChargeFailed(payload.data);
+                }
                 break;
 
             case 'transfer.success':
