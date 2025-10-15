@@ -23,34 +23,43 @@ const app_1 = require("../../app");
 const http_status_codes_1 = require("http-status-codes");
 const cloudinary_1 = require("../../utils/cloudinary");
 const promises_1 = __importDefault(require("node:fs/promises"));
+const axios_1 = require("axios");
 const _signup = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    //check if email already exist
-    const emailExist = yield user_model_1.default.findOne({ email: data.email }).lean().exec();
-    if (emailExist) {
+    try {
+        //check if email already exist
+        const emailExist = yield user_model_1.default.findOne({ email: data.email, name: data.business_name }).lean().exec();
+        if (emailExist) {
+            throw new App_1.CustomError({
+                message: "email or user already exist",
+                code: http_status_codes_1.StatusCodes.CONFLICT,
+            });
+        }
+        const newPayload = Object.assign({}, data);
+        //save user
+        const user = yield user_model_1.default.create(Object.assign(Object.assign({}, newPayload), { password: yield bcryptjs_1.default.hash(data.password, 10) }));
+        //generate otp
+        const otp = otp_generator_1.default.generate(6, {
+            digits: true,
+            lowerCaseAlphabets: false,
+            upperCaseAlphabets: false,
+            specialChars: false,
+        });
+        console.log(otp);
+        //send otp to user email
+        yield new App_1.EmailService().sendOTP("Account Verification", user.email, user.name, otp);
+        console.log("otp sent to mail", otp);
+        //save otp in memory
+        const client = yield app_1.redis_client.getRedisClient();
+        client.set(user.email, yield bcryptjs_1.default.hash(otp, 10), "EX", 60 * 10);
+        //return message
+        return "check Email. OTP sent";
+    }
+    catch (error) {
         throw new App_1.CustomError({
-            message: "email or user already exist",
-            code: http_status_codes_1.StatusCodes.CONFLICT,
+            message: error.message || axios_1.HttpStatusCode.InternalServerError,
+            code: error.code
         });
     }
-    const newPayload = Object.assign({}, data);
-    //save user
-    const user = yield user_model_1.default.create(Object.assign(Object.assign({}, newPayload), { password: yield bcryptjs_1.default.hash(data.password, 10) }));
-    //generate otp
-    const otp = otp_generator_1.default.generate(6, {
-        digits: true,
-        lowerCaseAlphabets: false,
-        upperCaseAlphabets: false,
-        specialChars: false,
-    });
-    console.log(otp);
-    //send otp to user email
-    yield new App_1.EmailService().sendOTP("Account Verification", user.email, user.name, otp);
-    console.log("otp sent to mail", otp);
-    //save otp in memory
-    const client = yield app_1.redis_client.getRedisClient();
-    client.set(user.email, yield bcryptjs_1.default.hash(otp, 10), "EX", 60 * 10);
-    //return message
-    return "check Email. OTP sent";
 });
 exports._signup = _signup;
 const _verifyAccount = (user_email, otp) => __awaiter(void 0, void 0, void 0, function* () {

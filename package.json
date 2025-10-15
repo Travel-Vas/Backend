@@ -27,6 +27,7 @@
     "@aws-sdk/client-s3": "^3.554.0",
     "@aws-sdk/client-ses": "^3.651.1",
     "@aws-sdk/s3-request-presigner": "^3.592.0",
+    "@getbrevo/brevo": "^3.0.1",
     "@google-apps/meet": "^0.2.0",
     "@google-cloud/local-auth": "^2.1.0",
     "@google-cloud/storage": "^7.16.0",

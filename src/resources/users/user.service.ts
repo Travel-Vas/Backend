@@ -22,49 +22,56 @@ import {StatusCodes} from "http-status-codes";
 import {uploadFilePathToCloudinary} from "../../utils/cloudinary";
 import fs from "node:fs/promises";
 import mongoose from "mongoose";
-import axios from "axios";
+import axios, {HttpStatusCode} from "axios";
 
 export const _signup: ISignup = async (data: SignupDTO) => {
-  //check if email already exist
-  const emailExist = await userModel.findOne({ email: data.email}).lean().exec()
-  if (emailExist){
-    throw new CustomError({
-      message: "email or user already exist",
-      code: StatusCodes.CONFLICT,
+  try {
+    //check if email already exist
+    const emailExist = await userModel.findOne({ email: data.email, name:data.business_name}).lean().exec()
+    if (emailExist){
+      throw new CustomError({
+        message: "email or user already exist",
+        code: StatusCodes.CONFLICT,
+      });
+    }
+    const newPayload = {
+      ...data
+    }
+    //save user
+    const user = await userModel.create({
+      ...newPayload,
+      password: await bcrypt.hash(data.password, 10),
     });
+
+    //generate otp
+    const otp = otpGenerator.generate(6, {
+      digits: true,
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    console.log(otp);
+    //send otp to user email
+    await new EmailService().sendOTP(
+        "Account Verification",
+        user.email,
+        user.name,
+        otp
+    );
+
+    console.log("otp sent to mail", otp);
+    //save otp in memory
+    const client = await redis_client.getRedisClient();
+    client.set(user.email, await bcrypt.hash(otp, 10), "EX", 60 * 10);
+    //return message
+    return "check Email. OTP sent";
+  }catch(error:any){
+    throw new CustomError({
+      message: error.message || HttpStatusCode.InternalServerError,
+      code: error.code
+    })
   }
-  const newPayload = {
-    ...data
-  }
-  //save user
-  const user = await userModel.create({
-    ...newPayload,
-    password: await bcrypt.hash(data.password, 10),
-  });
-
-  //generate otp
-  const otp = otpGenerator.generate(6, {
-    digits: true,
-    lowerCaseAlphabets: false,
-    upperCaseAlphabets: false,
-    specialChars: false,
-  });
-
-  console.log(otp);
-  //send otp to user email
-  await new EmailService().sendOTP(
-    "Account Verification",
-    user.email,
-    user.name,
-    otp
-  );
-
-  console.log("otp sent to mail", otp);
-  //save otp in memory
-  const client = await redis_client.getRedisClient();
-  client.set(user.email, await bcrypt.hash(otp, 10), "EX", 60 * 10);
-  //return message
-  return "check Email. OTP sent";
 };
 
 export const _verifyAccount: IVerifyAccount = async (user_email, otp) => {
