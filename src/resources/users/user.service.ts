@@ -21,7 +21,7 @@ import {ResendOTPType} from "../../helpers/constants";
 import {StatusCodes} from "http-status-codes";
 import {uploadFilePathToCloudinary} from "../../utils/cloudinary";
 import fs from "node:fs/promises";
-import mongoose from "mongoose";
+import mongoose, {startSession} from "mongoose";
 import axios, {HttpStatusCode} from "axios";
 
 const handleMongoError = (error: any): never => {
@@ -65,6 +65,8 @@ const handleMongoError = (error: any): never => {
   });
 };
 export const _signup: ISignup = async (data: SignupDTO) => {
+  const session = await startSession();
+  session.startTransaction();
   try {
     //check if email already exist
     const emailExist = await userModel.findOne({ email: data.email, name:data.business_name}).lean().exec()
@@ -107,6 +109,7 @@ export const _signup: ISignup = async (data: SignupDTO) => {
     //return message
     return "check Email. OTP sent";
   }catch(error:any){
+    await session.abortTransaction();
     console.error('[SIGNUP ERROR]:', {
       message: error.message,
       code: error.code,
@@ -129,6 +132,8 @@ export const _signup: ISignup = async (data: SignupDTO) => {
       message: error.message || "An unexpected error occurred during signup",
       code: StatusCodes.INTERNAL_SERVER_ERROR,
     });
+  }finally {
+    session.endSession();
   }
   }
 
