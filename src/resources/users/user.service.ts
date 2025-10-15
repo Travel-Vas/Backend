@@ -24,6 +24,46 @@ import fs from "node:fs/promises";
 import mongoose from "mongoose";
 import axios, {HttpStatusCode} from "axios";
 
+const handleMongoError = (error: any): never => {
+  // E11000 duplicate key error
+  if (error.code === 11000 || error.name === 'MongoServerError') {
+    const field = Object.keys(error.keyPattern || {})[0] || 'field';
+    throw new CustomError({
+      message: `${field} already exists. Please use a different ${field}.`,
+      code: StatusCodes.CONFLICT,
+    });
+  }
+
+  // Validation errors
+  if (error.name === 'ValidationError') {
+    const messages = Object.values(error.errors)
+        .map((err: any) => err.message)
+        .join(', ');
+    throw new CustomError({
+      message: `Validation failed: ${messages}`,
+      code: StatusCodes.BAD_REQUEST,
+    });
+  }
+
+  // Cast errors (invalid ObjectId, etc.)
+  if (error.name === 'CastError') {
+    throw new CustomError({
+      message: `Invalid ${error.path}: ${error.value}`,
+      code: StatusCodes.BAD_REQUEST,
+    });
+  }
+
+  // Re-throw if already a CustomError
+  if (error instanceof CustomError) {
+    throw error;
+  }
+
+  // Generic error
+  throw new CustomError({
+    message: 'An error occurred during signup',
+    code: StatusCodes.INTERNAL_SERVER_ERROR,
+  });
+};
 export const _signup: ISignup = async (data: SignupDTO) => {
   try {
     //check if email already exist
@@ -67,12 +107,30 @@ export const _signup: ISignup = async (data: SignupDTO) => {
     //return message
     return "check Email. OTP sent";
   }catch(error:any){
+    console.error('[SIGNUP ERROR]:', {
+      message: error.message,
+      code: error.code,
+      name: error.name,
+      stack: error.stack,
+    });
+
+    // Handle MongoDB-specific errors
+    if (error.code === 11000 || error.name === 'MongoServerError' || error.name === 'ValidationError') {
+      handleMongoError(error);
+    }
+
+    // Re-throw CustomError as-is
+    if (error instanceof CustomError) {
+      throw error;
+    }
+
+    // Wrap unknown errors
     throw new CustomError({
-      message: error.message || HttpStatusCode.InternalServerError,
-      code: error.code
-    })
+      message: error.message || "An unexpected error occurred during signup",
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
+    });
   }
-};
+  }
 
 export const _verifyAccount: IVerifyAccount = async (user_email, otp) => {
   const client = await redis_client.getRedisClient();
